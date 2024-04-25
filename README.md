@@ -1,0 +1,1 @@
+This repository pools all of the technical files and instructions needed to replicate the dataglove that was developed as a master thesis. The repository is split into two main sections; hardware and software.
