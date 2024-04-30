@@ -7,3 +7,5 @@ It is recommended to either use external power bank via the USB-C connector or y
 The current code contains numerous functions that can be commented or uncommetned, depending on the desired data output. It is recommended to have a quick look over the main loop() function and its comments.
 ## CAD
 The CAD files are given as STL and Siemens NX. A lot of the components are attached to the glove using velcro and velcro straps.
+## MatLab
+The simulink model used for developing and testing the Madgwick fusion algorithm is included. Also the Matlab script used for obtaining the magnetometer matrices is included.
