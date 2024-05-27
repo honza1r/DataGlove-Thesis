@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  ros-bridge:
+    build: ./ros-bridge
+    user: non-root-user  # Replace with appropriate non-root user if needed
+    networks:
+      network:
+        ipv4_address: "192.168.1.100"  # Replace with a suitable IP address
+    dns:
+      - 8.8.8.8  # Public DNS server (e.g., Google DNS)
+    ports:
+      - "9090:9090"
+    command: bash -c "source /opt/ros/humble/setup.bash && ros2 launch rosbridge_server rosbridge_websocket_launch.xml"
+
+  web-server:
+    build: ./web-server
+    ports:
+      - "8080:80"  # 80 on docker 8080 on host
+    networks:
+      - network
+    dns:
+      - 8.8.8.8  # Public DNS server
+
+  backend-server:
+    build: ./backend-server
+    volumes:
+      - shared-data:/shared-data
+    networks:
+      - network
+    dns:
+      - 8.8.8.8  # Public DNS server
+    ports:
+      - "3000:3000"
+
+  micro-ros-agent:
+    build: ./micro-ros-agent
+    ports:
+      - "50000:50000"
+    volumes:
+      - shared-data:/shared-data
+    init: true
+
+networks:
+  network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "192.168.1.0/24"
+
+volumes:
+  shared-data:

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+</head>
+<body>
+  <h1>Rosbridge demo</h1>
+
+  <form id="agentForm">
+    <label for="port">Port:</label>
+    <input type="text" id="port" name="port"><br><br>
+
+    <label for="transport">Transport:</label>
+    <select id="transport" name="transport">
+      <option value="udp4">UDPv4</option>
+      <option value="tcp4">TCPv4</option>
+      <option value="udp6">UDPv6</option>
+      <option value="tcp6">TCPv6</option>
+    </select><br><br>
+
+    <button type="button" id="startAgent">Start Agent</button>
+    <button type="button" id="stopAgent">Stop Agent</button>
+  </form>
+
+  <p>To see this page update:</p>
+  <ul>
+    <li>Run a Rosbridge connection at <code>ws://localhost:9090</code></li>
+    <li>Start publishing ROS messages to <code>/my_topic</code></li>
+  </ul>
+
+  <hr/>
+
+  <p>Connection: <span id="status" style="font-weight: bold;">N/A</span></p>
+  <p><code>/my_topic</code> messages received: <ul id="messages" style="font-weight: bold;"></ul></p>
+
+  <script src="/roslib.min.js"></script>
+  
+  <script type="text/javascript">
+      const ros = new ROSLIB.Ros({ url: "ws://localhost:9090" });
+
+      ros.on("connection", () => {
+      document.getElementById("status").innerHTML = "successful";
+      });
+
+      ros.on("error", (error) => {
+      document.getElementById("status").innerHTML = `errored out (${error})`;
+      });
+
+      ros.on("close", () => {
+      document.getElementById("status").innerHTML = "closed";
+      });
+
+      const my_topic_listener = new ROSLIB.TOPIC({
+      ros,
+      name: "/my_topic",
+      messageType: "std_msgs/String",
+      });
+
+      my_topic_listener.subscribe((message) => {
+      const ul = document.getElementById("messages");
+      const newMessage = document.createElement("li");
+      newMessage.appendChild(document.createTextNode(message.data));
+      ul.appendChild(newMessage);
+      });
+      
+  </script>
+
+  <script type="text/javascript">
+    document.getElementById("startAgent").addEventListener("click", function(){
+        const port = document.getElementById("port").value;
+        const transport = document.getElementById("transport").value;
+
+        fetch('/api/start_agent', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ port, transport }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    });
+
+    document.getElementById("stopAgent").addEventListener("click", function(){
+        fetch('/api/stop_agent', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    });
+  </script>
+
+</body>
+</html>
